@@ -852,6 +852,15 @@ ui <- navbarPage(
   tabPanel(
     "Home",
     fluidPage(
+      tags$div(
+        style = "margin: 18px 0 0 18px;",
+        tags$a(
+          href = "https://penn-state-rolls-collection.github.io/rolls-data-explorer/",
+          class = "btn btn-default",
+          style = "color: #005b8f; border-color: #005b8f; font-weight: 700;",
+          "← Back to Rolls Collection"
+        )
+      ),
       div(
         class = "home-hero",
         fluidRow(
