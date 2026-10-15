@@ -1379,6 +1379,42 @@ ui <- navbarPage(
 
 server <- function(input, output, session) {
   
+  # Keep the selected dashboard tab in the URL for shareable direct links.
+  # The Data Quality tab uses its existing internal value, "data_quality".
+  tab_urls <- c(
+    "Home" = "home",
+    "README" = "readme",
+    "Study Overview" = "study-overview",
+    "data_quality" = "data-quality",
+    "Dataset Explorer" = "dataset-explorer",
+    "Variable Explorer" = "variable-explorer",
+    "Pre/Post Explorer" = "pre-post-explorer",
+    "Nutrition Explorer" = "nutrition-explorer"
+  )
+  
+  # Load the correct tab when a bookmarked URL is opened, including Back/Forward.
+  observeEvent(session$clientData$url_search, {
+    query <- shiny::parseQueryString(session$clientData$url_search)
+    requested <- query[["tab"]]
+    if (is.null(requested) || length(requested) != 1) return()
+    target <- names(tab_urls)[match(requested, unname(tab_urls))]
+    if (length(target) == 1 && !is.na(target) &&
+        !identical(isolate(input$main_navigation), target)) {
+      updateNavbarPage(session, "main_navigation", selected = target)
+    }
+  }, ignoreInit = FALSE)
+  
+  # Change the browser URL whenever a user changes tabs.
+  observeEvent(input$main_navigation, {
+    selected <- input$main_navigation
+    if (is.null(selected) || !(selected %in% names(tab_urls))) return()
+    desired <- tab_urls[[selected]]
+    current <- shiny::parseQueryString(session$clientData$url_search)[["tab"]]
+    if (!identical(current, desired)) {
+      updateQueryString(paste0("?tab=", desired), mode = "push", session = session)
+    }
+  }, ignoreInit = TRUE)
+  
   observeEvent(input$study_quality_click, {
     req(input$study_quality_click$study)
     
